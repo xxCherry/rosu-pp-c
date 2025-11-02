@@ -50,6 +50,10 @@ pub struct ScoreState {
     pub n50: u32,
     /// Amount of current misses (fruits + droplets for osu!catch).
     pub misses: u32,
+    /// Legacy total score.
+    ///
+    /// Only relevant for osu!standard in stable.
+    pub legacy_total_score: Option<u32>,
 }
 
 impl ScoreState {
@@ -66,6 +70,7 @@ impl ScoreState {
             n100: 0,
             n50: 0,
             misses: 0,
+            legacy_total_score: None,
         }
     }
 
@@ -98,6 +103,7 @@ impl From<ScoreState> for OsuScoreState {
             n100: state.n100,
             n50: state.n50,
             misses: state.misses,
+            legacy_total_score: state.legacy_total_score,
         }
     }
 }
@@ -152,6 +158,7 @@ impl From<OsuScoreState> for ScoreState {
             n100: state.n100,
             n50: state.n50,
             misses: state.misses,
+            legacy_total_score: state.legacy_total_score,
         }
     }
 }
@@ -169,6 +176,7 @@ impl From<TaikoScoreState> for ScoreState {
             n100: state.n100,
             n50: 0,
             misses: state.misses,
+            legacy_total_score: None,
         }
     }
 }
@@ -186,6 +194,7 @@ impl From<CatchScoreState> for ScoreState {
             n100: state.droplets,
             n50: state.tiny_droplets,
             misses: state.misses,
+            legacy_total_score: None,
         }
     }
 }
@@ -203,6 +212,7 @@ impl From<ManiaScoreState> for ScoreState {
             n100: state.n100,
             n50: state.n50,
             misses: state.misses,
+            legacy_total_score: None,
         }
     }
 }
