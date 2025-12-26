@@ -376,6 +376,7 @@ impl<'map> TryFrom<OsuPerformance<'map>> for TaikoPerformance<'map> {
             n50: _,
             misses,
             hitresult_priority,
+            legacy_total_score: _,
         } = osu;
 
         Ok(Self {
