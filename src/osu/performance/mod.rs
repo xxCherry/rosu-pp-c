@@ -23,7 +23,6 @@ use super::{
 
 mod calculator;
 pub mod gradual;
-mod legacy_score;
 
 /// Performance calculator on osu!standard maps.
 #[derive(Clone, Debug, PartialEq)]
