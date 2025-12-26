@@ -36,6 +36,10 @@ pub struct OsuScoreState {
     pub n50: u32,
     /// Amount of current misses.
     pub misses: u32,
+    /// Legacy total score.
+    ///
+    /// Only relevant for osu!stable
+    pub legacy_total_score: Option<u32>,
 }
 
 impl OsuScoreState {
@@ -50,6 +54,7 @@ impl OsuScoreState {
             n100: 0,
             n50: 0,
             misses: 0,
+            legacy_total_score: None,
         }
     }
 
