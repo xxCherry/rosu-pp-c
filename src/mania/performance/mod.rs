@@ -229,7 +229,7 @@ impl<'map> ManiaPerformance<'map> {
     }
 
     /// Provide parameters through an [`ManiaScoreState`].
-    #[allow(clippy::needless_pass_by_value)]
+    #[expect(clippy::needless_pass_by_value, reason = "more sensible")]
     pub const fn state(mut self, state: ManiaScoreState) -> Self {
         let ManiaScoreState {
             n320,
@@ -251,7 +251,7 @@ impl<'map> ManiaPerformance<'map> {
     }
 
     /// Create the [`ManiaScoreState`] that will be used for performance calculation.
-    #[allow(clippy::too_many_lines, clippy::similar_names)]
+    #[expect(clippy::too_many_lines, reason = "it is what it is /shrug")]
     pub fn generate_state(&mut self) -> Result<ManiaScoreState, ConvertError> {
         let attrs = match self.map_or_attrs {
             MapOrAttrs::Map(ref map) => {
@@ -860,7 +860,11 @@ mod tests {
     ///
     /// Very slow but accurate. Only slight optimizations have been applied so
     /// that it doesn't run unreasonably long.
-    #[allow(clippy::too_many_arguments, clippy::too_many_lines)]
+    #[expect(
+        clippy::too_many_arguments,
+        clippy::too_many_lines,
+        reason = "it is what it is /shrug"
+    )]
     fn brute_force_best(
         classic: bool,
         acc: f64,

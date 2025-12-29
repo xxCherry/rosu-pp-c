@@ -232,7 +232,7 @@ impl<'map> CatchPerformance<'map> {
     }
 
     /// Provide parameters through an [`CatchScoreState`].
-    #[allow(clippy::needless_pass_by_value)]
+    #[expect(clippy::needless_pass_by_value, reason = "more sensible")]
     pub const fn state(mut self, state: CatchScoreState) -> Self {
         let CatchScoreState {
             max_combo,
@@ -262,7 +262,7 @@ impl<'map> CatchPerformance<'map> {
     }
 
     /// Create the [`CatchScoreState`] that will be used for performance calculation.
-    #[allow(clippy::too_many_lines)]
+    #[expect(clippy::too_many_lines, reason = "TODO: refactor")]
     pub fn generate_state(&mut self) -> Result<CatchScoreState, ConvertError> {
         let attrs = match self.map_or_attrs {
             MapOrAttrs::Map(ref map) => {
@@ -369,10 +369,9 @@ impl<'map> CatchPerformance<'map> {
             }
         };
 
-        #[allow(clippy::single_match_else)]
         match (self.tiny_droplets, self.tiny_droplet_misses) {
-            (Some(n_tiny_droplets), Some(n_tiny_droplet_misses)) => match self.acc {
-                Some(acc) => {
+            (Some(n_tiny_droplets), Some(n_tiny_droplet_misses)) => {
+                if let Some(acc) = self.acc {
                     match (n_tiny_droplets + n_tiny_droplet_misses).cmp(&attrs.n_tiny_droplets) {
                         Ordering::Equal => {
                             best_state.tiny_droplets = n_tiny_droplets;
@@ -380,8 +379,7 @@ impl<'map> CatchPerformance<'map> {
                         }
                         Ordering::Less | Ordering::Greater => find_best_tiny_droplets(acc),
                     }
-                }
-                None => {
+                } else {
                     let n_remaining = attrs
                         .n_tiny_droplets
                         .saturating_sub(n_tiny_droplets + n_tiny_droplet_misses);
@@ -389,7 +387,7 @@ impl<'map> CatchPerformance<'map> {
                     best_state.tiny_droplets = n_tiny_droplets + n_remaining;
                     best_state.tiny_droplet_misses = n_tiny_droplet_misses;
                 }
-            },
+            }
             (Some(n_tiny_droplets), None) => {
                 best_state.tiny_droplets = cmp::min(attrs.n_tiny_droplets, n_tiny_droplets);
                 best_state.tiny_droplet_misses =

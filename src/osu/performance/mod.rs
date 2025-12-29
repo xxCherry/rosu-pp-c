@@ -90,8 +90,10 @@ impl<'map> OsuPerformance<'map> {
     /// [`mode_or_ignore`] instead.
     ///
     /// [`mode_or_ignore`]: Self::mode_or_ignore
-    // The `Ok`-variant is larger in size
-    #[allow(clippy::result_large_err)]
+    #[expect(
+        clippy::result_large_err,
+        reason = "Ok-variant is still larger in size"
+    )]
     pub fn try_mode(self, mode: GameMode) -> Result<Performance<'map>, Self> {
         match mode {
             GameMode::Osu => Ok(Performance::Osu(self)),
@@ -326,7 +328,7 @@ impl<'map> OsuPerformance<'map> {
     }
 
     /// Provide parameters through an [`OsuScoreState`].
-    #[allow(clippy::needless_pass_by_value)]
+    #[expect(clippy::needless_pass_by_value, reason = "more sensible")]
     pub const fn state(mut self, state: OsuScoreState) -> Self {
         let OsuScoreState {
             max_combo,
@@ -362,7 +364,7 @@ impl<'map> OsuPerformance<'map> {
     }
 
     /// Create the [`OsuScoreState`] that will be used for performance calculation.
-    #[allow(clippy::too_many_lines)]
+    #[expect(clippy::too_many_lines, reason = "it is what it is /shrug")]
     pub fn generate_state(&mut self) -> Result<OsuScoreState, ConvertError> {
         let attrs = match self.map_or_attrs {
             MapOrAttrs::Map(ref map) => {
@@ -780,7 +782,10 @@ impl<'map> OsuPerformance<'map> {
         }
     }
 
-    #[allow(clippy::result_large_err)]
+    #[expect(
+        clippy::result_large_err,
+        reason = "Result type serves more as 'Either'"
+    )]
     pub(crate) fn try_convert_map(
         map_or_attrs: MapOrAttrs<'map, Osu>,
         mode: GameMode,
@@ -922,7 +927,7 @@ mod test {
     /// and returns the [`OsuScoreState`] that matches `acc` the best.
     ///
     /// Very slow but accurate.
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::too_many_arguments, reason = "it is what it is /shrug")]
     fn brute_force_best(
         lazer: bool,
         classic: bool,
