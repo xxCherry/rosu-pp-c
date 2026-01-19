@@ -1,7 +1,11 @@
 use rosu_map::section::general::GameMode;
 
 use crate::{
-    Difficulty, GameMods, catch::CatchPerformance, mania::ManiaPerformance, osu::OsuPerformance,
+    Difficulty, GameMods,
+    any::HitResultGenerator,
+    catch::CatchPerformance,
+    mania::ManiaPerformance,
+    osu::{OsuHitResultParams, OsuPerformance},
     taiko::TaikoPerformance,
 };
 
@@ -295,15 +299,25 @@ impl<'map> Performance<'map> {
         }
     }
 
-    /// Specify how hitresults should be generated.
-    ///
-    /// Defauls to [`HitResultPriority::BestCase`].
+    /// Specify the priority of hitresults.
     pub fn hitresult_priority(self, priority: HitResultPriority) -> Self {
         match self {
             Self::Osu(o) => Self::Osu(o.hitresult_priority(priority)),
             Self::Taiko(t) => Self::Taiko(t.hitresult_priority(priority)),
             Self::Catch(_) => self,
             Self::Mania(m) => Self::Mania(m.hitresult_priority(priority)),
+        }
+    }
+
+    /// Specify how hitresults should be generated.
+    ///
+    /// TODO: example of what to do if only some modes should be supported
+    pub fn hitresult_generator<H: HitResultGenerator<OsuHitResultParams>>(self) -> Self {
+        match self {
+            Performance::Osu(o) => Self::Osu(o.hitresult_generator::<H>()),
+            Performance::Taiko(t) => todo!(),
+            Performance::Catch(c) => todo!(),
+            Performance::Mania(m) => todo!(),
         }
     }
 
@@ -441,6 +455,7 @@ pub enum HitResultPriority {
     /// Prioritize bad hitresults over good ones
     WorstCase,
     /// Prioritize fast hitresults generation
+    // TODO: remove variant
     Fastest,
 }
 
