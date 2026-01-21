@@ -44,6 +44,7 @@ jobs:
         with:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.artifact_path }}
+          path: dist/*
           if-no-files-found: error
 
   release:
@@ -60,11 +61,9 @@ jobs:
       - name: Create GitHub release and upload assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.inputs.tag_name }}
+          tag_name: ${{ github.event.release.tag_name || inputs.tag_name }}
           files: |
             dist/**/*.dll
             dist/**/*.so
-          generate_release_notes: true
-          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
