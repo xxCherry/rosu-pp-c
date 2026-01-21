@@ -1,12 +1,14 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "v*"
-
-permissions:
-  contents: write
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Tag to upload assets
+        required: true
+        type: string
 
 jobs:
   build:
