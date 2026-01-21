@@ -190,3 +190,21 @@ pub mod mania;
 
 /// Types used in and around this crate.
 pub mod model;
+
+/// C API for FFI consumers.
+#[cfg(feature = "capi")]
+pub mod capi;
+
+#[cfg(feature = "capi")]
+pub use self::capi::{
+    rosu_pp_beatmap_check_suspicion, rosu_pp_beatmap_free, rosu_pp_beatmap_from_bytes,
+    rosu_pp_beatmap_from_path, rosu_pp_beatmap_mode, rosu_pp_difficulty_attrs_free,
+    rosu_pp_difficulty_attrs_values, rosu_pp_difficulty_calculate, rosu_pp_error_str,
+    rosu_pp_gradual_performance_free, rosu_pp_gradual_performance_last,
+    rosu_pp_gradual_performance_new, rosu_pp_gradual_performance_next,
+    rosu_pp_performance_attrs_free, rosu_pp_performance_attrs_max_pp,
+    rosu_pp_performance_attrs_values, rosu_pp_performance_calculate,
+    rosu_pp_performance_from_bytes, rosu_pp_performance_from_path, rosu_pp_score_state_new,
+    RosuPpDifficultyAttributes, RosuPpError, RosuPpGameMode, RosuPpPerformanceAttributes,
+    RosuPpScoreState, RosuPpSuspicion,
+};
