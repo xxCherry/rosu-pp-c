@@ -20,11 +20,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            artifact_name: linux-librosu_pp-so
-            artifact_path: target/release/*.so
+            artifact_name: rosu_pp_linux64
+            artifact_path: target/release/**/*rosu_pp*.so
           - os: windows-latest
-            artifact_name: windows-rosu_pp-dll
-            artifact_path: target/release/*.dll
+            artifact_name: rosu_pp_windows64
+            artifact_path: target/release/**/*rosu_pp*.dll
 
     steps:
       - name: Checkout project
@@ -36,7 +36,7 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Build cdylib
+      - name: Build library
         run: cargo build --release --features capi
 
       - name: Upload artifact
