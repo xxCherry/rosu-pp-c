@@ -56,6 +56,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: target/release
+          merge-multiple: true
 
       - name: Create GitHub release and upload assets
         uses: softprops/action-gh-release@v2
