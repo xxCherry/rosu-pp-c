@@ -37,7 +37,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build cdylib
-        run: cargo build --release --locked --no-default-features --features capi
+        run: cargo build --release --features capi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
