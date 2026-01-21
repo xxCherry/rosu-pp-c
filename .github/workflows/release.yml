@@ -10,6 +10,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build (${{ matrix.os }})
@@ -21,10 +24,8 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact_name: rosu_pp_linux64
-            artifact_path: target/release/**/*rosu_pp*.so
           - os: windows-latest
             artifact_name: rosu_pp_windows64
-            artifact_path: target/release/**/*rosu_pp*.dll
 
     steps:
       - name: Checkout project
@@ -37,13 +38,53 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build library
-        run: cargo build --release --features capi
+        run: cargo build --release --locked --no-default-features --features capi --target-dir target
+
+      - name: Collect .so
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+
+          if [[ -f target/release/librosu_pp.so ]]; then
+            cp target/release/librosu_pp.so dist/librosu_pp.so
+            exit 0
+          fi
+
+          so="$(find target -type f -path '*/release/*' -name '*rosu*pp*.so' -print -quit)"
+
+          if [[ -z "$so" ]]; then
+            echo "Could not locate a .so file under ./target"
+            find target -maxdepth 4 -type f -print
+            exit 1
+          fi
+
+          cp "$so" dist/librosu_pp.so
+
+      - name: Collect .dll
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+
+          $dll = Get-ChildItem -Path target -Recurse -File |
+            Where-Object { $_.FullName -match '\\release\\' -and $_.Name -match 'rosu[-_]?pp.*\.dll$' } |
+            Select-Object -First 1
+
+          if (-not $dll) {
+            Write-Host "Could not locate a .dll file under .\\target"
+            Get-ChildItem -Path target -Recurse
+            exit 1
+          }
+
+          Copy-Item $dll.FullName -Destination "dist\\rosu_pp.dll" -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: ${{ matrix.artifact_path }}
+          path: dist/*
           if-no-files-found: error
 
   release:
@@ -60,6 +101,7 @@ jobs:
       - name: Create GitHub release and upload assets
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.release.tag_name || inputs.tag_name }}
           files: |
             dist/**/*.dll
             dist/**/*.so
