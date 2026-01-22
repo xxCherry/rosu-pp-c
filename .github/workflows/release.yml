@@ -1,12 +1,14 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "v*"
-
-permissions:
-  contents: write
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Tag to upload assets
+        required: true
+        type: string
 
 jobs:
   build:
@@ -18,11 +20,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            artifact_name: linux-librosu_pp-so
-            artifact_path: target/release/*.so
+            artifact_name: rosu_pp_linux64
+            artifact_path: target/release/librosu_pp.so
           - os: windows-latest
-            artifact_name: windows-rosu_pp-dll
-            artifact_path: target/release/*.dll
+            artifact_name: rosu_pp_windows64
+            artifact_path: target/release/rosu_pp.dll
 
     steps:
       - name: Checkout project
@@ -34,8 +36,8 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Build cdylib
-        run: cargo build --release --locked --no-default-features --features capi
+      - name: Build library
+        run: cargo build --release --features capi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -53,15 +55,16 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          path: dist
+          path: target/release
+          merge-multiple: true
 
       - name: Create GitHub release and upload assets
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            dist/**/*.dll
-            dist/**/*.so
-          generate_release_notes: true
+          tag_name: ${{ github.event.release.tag_name || inputs.tag_name }}
           fail_on_unmatched_files: true
+          files: |
+            target/release/rosu_pp.dll
+            target/release/librosu_pp.so
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
