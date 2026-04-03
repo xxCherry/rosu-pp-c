@@ -152,7 +152,7 @@
 //! ```bash
 //! rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
 //! cargo install cargo-ndk
-//! cargo ndk -p 21 -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 -o ./jniLibs build --release --features capi
+//! CARGO_NDK_PLATFORM=24 cargo ndk -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 -o ./jniLibs build --release --features capi
 //! ```
 //!
 //! `cargo-ndk` will place Android libraries in `jniLibs/<abi>/librosu_pp.so` and will
