@@ -18,6 +18,7 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
+          - macos-15
 
     steps:
       - name: Checkout project
@@ -31,3 +32,64 @@ jobs:
 
       - name: Build
         run: cargo build --all-targets --all-features
+
+  ffi_macos:
+    name: Build FFI (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            target: aarch64-apple-darwin
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build C API library
+        run: cargo build --release --features capi --target ${{ matrix.target }}
+
+  ffi_android:
+    name: Build FFI (android)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+
+      - name: Build C API libraries
+        run: >
+          cargo ndk
+          -p 21
+          -t armeabi-v7a
+          -t arm64-v8a
+          -t x86
+          -t x86_64
+          -o target/android/jniLibs
+          build
+          --release
+          --features capi

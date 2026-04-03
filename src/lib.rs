@@ -137,6 +137,28 @@
 //! - JavaScript: [rosu-pp-js]
 //! - Python: [rosu-pp-py]
 //!
+//! ### C API builds
+//!
+//! Enable the `capi` feature when producing shared libraries for FFI consumers.
+//!
+//! macOS:
+//! ```bash
+//! rustup target add aarch64-apple-darwin x86_64-apple-darwin
+//! cargo build --release --features capi --target aarch64-apple-darwin
+//! cargo build --release --features capi --target x86_64-apple-darwin
+//! ```
+//!
+//! Android:
+//! ```bash
+//! rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+//! cargo install cargo-ndk
+//! cargo ndk -p 21 -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 -o ./jniLibs build --release --features capi
+//! ```
+//!
+//! `cargo-ndk` will place Android libraries in `jniLibs/<abi>/librosu_pp.so` and will
+//! use the default Android NDK installation automatically. If the NDK lives elsewhere,
+//! set `ANDROID_NDK_HOME` before building.
+//!
 //! [osu!]: https://osu.ppy.sh/home
 //! [osu!lazer]: https://github.com/ppy/osu
 //! [osu!tools]: https://github.com/ppy/osu-tools

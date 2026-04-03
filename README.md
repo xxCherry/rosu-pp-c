@@ -141,6 +141,10 @@ Using `rosu-pp` from other languages than Rust:
 - JavaScript: [rosu-pp-js]
 - Python: [rosu-pp-py]
 
+### C API builds
+
+Enable the `capi` feature when producing shared libraries for FFI consumers.
+
 [osu!]: https://osu.ppy.sh/home
 [osu!lazer]: https://github.com/ppy/osu
 [osu!tools]: https://github.com/ppy/osu-tools

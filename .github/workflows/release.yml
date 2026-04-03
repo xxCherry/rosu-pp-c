@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    name: Build (${{ matrix.os }})
+    name: Build (${{ matrix.artifact_name }})
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -20,11 +20,25 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            library_name: librosu_pp.so
             artifact_name: rosu_pp_linux64
-            artifact_path: target/release/librosu_pp.so
+            asset_name: librosu_pp.so
           - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            library_name: rosu_pp.dll
             artifact_name: rosu_pp_windows64
-            artifact_path: target/release/rosu_pp.dll
+            asset_name: rosu_pp.dll
+          - os: macos-15
+            target: aarch64-apple-darwin
+            library_name: librosu_pp.dylib
+            artifact_name: rosu_pp_macos_arm64
+            asset_name: librosu_pp_macos_arm64.dylib
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+            library_name: librosu_pp.dylib
+            artifact_name: rosu_pp_macos_x64
+            asset_name: librosu_pp_macos_x64.dylib
 
     steps:
       - name: Checkout project
@@ -37,25 +51,81 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build library
-        run: cargo build --release --features capi
+        run: cargo build --release --features capi --target ${{ matrix.target }}
+
+      - name: Stage asset
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          Copy-Item `
+            "target/${{ matrix.target }}/release/${{ matrix.library_name }}" `
+            "dist/${{ matrix.asset_name }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: ${{ matrix.artifact_path }}
+          path: dist/${{ matrix.asset_name }}
+          if-no-files-found: error
+
+  build_android:
+    name: Build (android)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+
+      - name: Build Android libraries
+        run: >
+          cargo ndk
+          -p 21
+          -t armeabi-v7a
+          -t arm64-v8a
+          -t x86
+          -t x86_64
+          -o dist/android/jniLibs
+          build
+          --release
+          --features capi
+
+      - name: Package Android libraries
+        shell: pwsh
+        run: Compress-Archive -Path dist/android/jniLibs -DestinationPath dist/rosu_pp_android.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rosu_pp_android
+          path: dist/rosu_pp_android.zip
           if-no-files-found: error
 
   release:
     name: Upload assets
     runs-on: ubuntu-latest
-    needs: build
+    needs:
+      - build
+      - build_android
 
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          path: target/release
+          path: dist
           merge-multiple: true
 
       - name: Create GitHub release and upload assets
@@ -64,7 +134,10 @@ jobs:
           tag_name: ${{ github.event.release.tag_name || inputs.tag_name }}
           fail_on_unmatched_files: true
           files: |
-            target/release/rosu_pp.dll
-            target/release/librosu_pp.so
+            dist/rosu_pp.dll
+            dist/librosu_pp.so
+            dist/librosu_pp_macos_arm64.dylib
+            dist/librosu_pp_macos_x64.dylib
+            dist/rosu_pp_android.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
