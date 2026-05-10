@@ -29,6 +29,11 @@ jobs:
             library_name: rosu_pp.dll
             artifact_name: rosu_pp_windows64
             asset_name: rosu_pp.dll
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            library_name: rosu_pp.dll
+            artifact_name: rosu_pp_windows_arm64
+            asset_name: rosu_pp_windows_arm64.dll
           - os: macos-15
             target: aarch64-apple-darwin
             library_name: librosu_pp.dylib
@@ -46,6 +51,8 @@ jobs:
 
       - name: Install stable toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
@@ -136,6 +143,7 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             dist/rosu_pp.dll
+            dist/rosu_pp_windows_arm64.dll
             dist/librosu_pp.so
             dist/librosu_pp_macos_arm64.dylib
             dist/librosu_pp_macos_x64.dylib

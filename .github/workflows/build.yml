@@ -33,7 +33,7 @@ jobs:
       - name: Build
         run: cargo build --all-targets --all-features
 
-  ffi_macos:
+  ffi_desktop:
     name: Build FFI (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
 
@@ -45,6 +45,8 @@ jobs:
             target: aarch64-apple-darwin
           - os: macos-15-intel
             target: x86_64-apple-darwin
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
 
     steps:
       - name: Checkout project
@@ -52,6 +54,8 @@ jobs:
 
       - name: Install stable toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2

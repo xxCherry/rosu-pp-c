@@ -141,6 +141,13 @@
 //!
 //! Enable the `capi` feature when producing shared libraries for FFI consumers.
 //!
+//! Windows:
+//! ```bash
+//! rustup target add x86_64-pc-windows-msvc aarch64-pc-windows-msvc
+//! cargo build --release --features capi --target x86_64-pc-windows-msvc
+//! cargo build --release --features capi --target aarch64-pc-windows-msvc
+//! ```
+//!
 //! macOS:
 //! ```bash
 //! rustup target add aarch64-apple-darwin x86_64-apple-darwin
